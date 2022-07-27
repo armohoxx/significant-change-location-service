@@ -50,6 +50,10 @@ extension MainPresenter: MainPresenterProtocol {
         self.view?.displayGpsSpeed(speed: speed)
     }
     
+    func notifyDisplayLatLng(latLng: String) {
+        self.view?.displayLatLng(latLng: latLng)
+    }
+    
     func notifyDisplayMotionData(motion: CMMotionActivity?, date: String) {
         if (motion?.stationary)! {
             print("stationary", (motion?.stationary)!)

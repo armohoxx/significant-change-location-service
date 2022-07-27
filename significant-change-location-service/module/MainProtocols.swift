@@ -22,6 +22,7 @@ protocol MainPresenterProtocol: class {
     func notifyFetchHistoryActivity(activity: [ActivityForm])
     func notifyLocationFetched()
     func notifyDisplayGPSSpeed(speed: Double)
+    func notifyDisplayLatLng(latLng: String)
     func notifyDisplayMotionData(motion: CMMotionActivity?, date: String)
     func notifyInsertHistoryActivity(activity: ActivityForm)
 }
@@ -39,6 +40,7 @@ protocol MainViewProtocol: class {
     var presenter: MainPresenterProtocol?  { get set }
     func displayLocationView(location: String)
     func displayGpsSpeed(speed: Double)
+    func displayLatLng(latLng: String)
     func displayMotionData(date: String, activity: String)
     func displayConfidentActivity(confident: String)
     func displayActivityFetch(activity: [ActivityForm])

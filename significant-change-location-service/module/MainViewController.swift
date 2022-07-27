@@ -28,6 +28,7 @@ class MainViewController: UIViewController {
     var dateData: String?
     var confidentData: String?
     var speedData: Double?
+    var latLngData: String?
     var locationData: String?
     
     override func viewDidLoad() {
@@ -52,23 +53,24 @@ class MainViewController: UIViewController {
         self.navigationItem.title = "Significant Change Location"
     }
     
-//    func prepareInsertHistoryActivity() {
-//        if let activity = self.activityData,
-//           let date = self.dateData,
-//           let confident =  self.confidentData,
-//           let speed = self.speedData,
-//           let location = self.locationData {
-//                let activityForm = ActivityForm(activity: activity,
-//                                                date: date,
-//                                                confident: confident,
-//                                                speed: speed,
-//                                                location: location)
-//
-//                self.presenter?.notifyInsertHistoryActivity(activity: activityForm)
-//            }
-//        self.presenter?.selfFetchActivity()
-//        self.collectionView.reloadData()
-//    }
+    //MARK: ย้ายไปอัพเดตตอนเช็คเวลากิจกรรม
+    func prepareInsertHistoryActivity() {
+        if let activity = self.activityData,
+           let date = self.dateData,
+           let latLng =  self.latLngData,
+           let speed = self.speedData,
+           let location = self.locationData {
+                let activityForm = ActivityForm(date: date,
+                                                activity: activity,
+                                                speed: speed,
+                                                latLng: latLng,
+                                                location: location)
+
+                self.presenter?.notifyInsertHistoryActivity(activity: activityForm)
+            }
+        self.presenter?.selfFetchActivity()
+        self.collectionView.reloadData()
+    }
 }
 
 extension MainViewController:  MainViewProtocol {
@@ -85,11 +87,17 @@ extension MainViewController:  MainViewProtocol {
         self.speedData = speed
     }
     
+    func displayLatLng(latLng: String) {
+        self.latAndLngLabel.text = "ละติจูด, ลองจิจูด\n \(latLng)"
+        self.latLngData = latLng
+    }
+    
     func displayMotionData(date: String, activity: String) {
         //MARK: การเช็คเปลี่ยนกิจกรรมยังไม่เสรียถ เเละยังเก็บเบื้องหลังไม่ได้
+        //MARK: ย้ายไปอัพเดตตอนเช็คเวลากิจกรรม
         if activity != activityData {
             self.collectionView.reloadData()
-            //self.prepareInsertHistoryActivity()
+            self.prepareInsertHistoryActivity()
         } else {
             self.collectionView.reloadData()
             print("activity not change = not insert to database")
@@ -111,5 +119,46 @@ extension MainViewController:  MainViewProtocol {
     
     func displayActivityFetch(activity: [ActivityForm]) {
         self.activityFecthData = activity
+    }
+}
+
+extension MainViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return self.activityFecthData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MainCell", for: indexPath) as! MainCell
+        
+        cell.displayHistoryActivity(activity: self.activityFecthData[indexPath.section])
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        
+        let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header", for: indexPath) as! MainHeader
+        let text = "กิจกรรมที่ \(self.activityFecthData.count - indexPath.section)"
+        headerView.headerLabel.text = text
+        return headerView
+    }
+}
+
+extension MainViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let sizeMessage: CGFloat = DynamicTextFieldSize.height(text: self.locationData, font: self.font, width: collectionView.frame.width)
+        return CGSize.init(width: collectionView.frame.width, height: 180 + sizeMessage)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize.init(width: UIScreen.main.bounds.width, height: 30)
     }
 }

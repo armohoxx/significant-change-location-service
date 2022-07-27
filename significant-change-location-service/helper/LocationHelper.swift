@@ -69,7 +69,10 @@ class LocationHelper : NSObject{
         default:
             break
         }
-        self.locm?.startUpdatingLocation()
+        //MARK: SignificantLocationChanges
+        self.startMySignificantLocationChanges()
+        //MARK: StandardLocationChanges
+        //self.locm?.startUpdatingLocation()
     }
     
     public func update(completion: ((CLLocation?) -> Void)?) {
@@ -81,7 +84,14 @@ class LocationHelper : NSObject{
         self.locm?.stopUpdatingLocation()
     }
     
-    
+    //MARK: SignificantLocationChanges
+    func startMySignificantLocationChanges() {
+        if !CLLocationManager.significantLocationChangeMonitoringAvailable() {
+            print("The device does not support this service.")
+            return
+        }
+        locm?.startMonitoringSignificantLocationChanges()
+    }
     
     //MARK: Updater
     
@@ -159,6 +169,7 @@ extension LocationHelper : CLLocationManagerDelegate {
             let speed: Double = 3.6 * location.speed
             
             NotificationCenter.default.post(name: .LocationHelperDidUpdatedGPSLocation, object: loc)
+            
             if let completion = self.updateCompletion {
                 completion(loc)
             }
@@ -175,6 +186,7 @@ extension LocationHelper : CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let delegate = self.delegate {
             delegate.onLocationUpdateFailed(error: error)
+            manager.stopMonitoringSignificantLocationChanges()
         }
     }
     
@@ -184,6 +196,7 @@ extension LocationHelper : CLLocationManagerDelegate {
             let err = NSError(domain: "To turn on Location Services for apps. Go to Settings > Privacy > Location Services.", code: 500, userInfo:nil)
             if let delegate = self.delegate {
                 delegate.onLocationUpdateFailed(error: err)
+                manager.stopMonitoringSignificantLocationChanges()
             }
             debugPrint(err.localizedDescription)
         default:

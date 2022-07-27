@@ -59,7 +59,7 @@ class DBActivityHelper {
                         countRow = Int(dataCountRow)
                         let limitCount = (countRow ?? 0) + 1
                         
-                        if limitCount > 20 {
+                        if limitCount > 100 {
                             print("data limit over 20 = \(String(describing: countRow))")
                             for _ in try database.prepare("delete from historyActivity where id in (select id from historyActivity LIMIT 1)") {
                                 try database.run(historyActivityTable.insert(date <- dateRow,

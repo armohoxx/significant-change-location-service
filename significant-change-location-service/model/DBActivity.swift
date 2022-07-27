@@ -27,7 +27,7 @@ class DBActivity {
                 print("Someting wrong in folder DB")
             }
             
-            let fileUrl = try! FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent("location-activity-app").appendingPathComponent("Database").appendingPathComponent(filename)
+            let fileUrl = try! FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent("significant-change-location-service-app").appendingPathComponent("Database").appendingPathComponent(filename)
             
             database = try Connection(fileUrl.path)
         } catch {

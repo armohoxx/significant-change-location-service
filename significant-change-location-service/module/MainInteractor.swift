@@ -21,9 +21,19 @@ class MainInteractor {
 extension MainInteractor: MainInteractorProtocol {
     
     func addLocationObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(onLocationGPSUpdatedNotification(notification:)), name: .LocationHelperDidUpdatedGPSLocation, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(onLocationNotificationError(notification:)), name: .LocationHelperDidError, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(onActivityMotionNotificationUpdated(notification:)), name: .ActivityMotionHelper, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(onSpeedLocationNotificationUpdated(notification:)), name: .LocationSpeedHelperDidUpdatedSelectedLocation, object: nil)
+    }
+    
+    @objc func onLocationGPSUpdatedNotification(notification: Notification) {
+        if let location = notification.object as? CLLocation {
+            print("location = \(location.coordinate.latitude), \(location.coordinate.longitude)")
+            
+            var latLng = "\(location.coordinate.latitude), \(location.coordinate.longitude)"
+            self.presenter?.notifyDisplayLatLng(latLng: latLng)
+        }
     }
     
     @objc func onLocationNotificationError(notification: Notification) {
