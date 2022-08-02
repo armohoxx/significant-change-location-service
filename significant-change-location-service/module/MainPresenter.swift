@@ -30,6 +30,21 @@ extension MainPresenter: MainPresenterProtocol {
     func notifyViewDidLoad() {
         self.interactor?.addLocationObserver()
         self.interactor?.fetchHistoryActivity()
+        self.notifyPostTrackedLocation()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(onLocationNameUpdatedNotification(notification:)), name: .LocationHelperReloadView, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(notifyLocationFetched(notification:)), name: .LocationHelperDidUpdatedSelectedLocation, object: nil)
+    }
+    
+    @objc func onLocationNameUpdatedNotification(notification: Notification) {
+        self.view?.reloadLocationNameService()
+        self.interactor?.fetchHistoryActivity()
+    }
+    
+    @objc func notifyLocationFetched(notification: Notification) {
+        if let streetName = notification.object as? String {
+            self.view?.displayLocationView(location: streetName)
+        }
     }
     
     func selfFetchActivity() {
@@ -38,12 +53,6 @@ extension MainPresenter: MainPresenterProtocol {
     
     func notifyFetchHistoryActivity(activity: [ActivityForm]) {
         self.view?.displayActivityFetch(activity: activity)
-    }
-    
-    func notifyLocationFetched() {
-        LocationHelper.shared.geoUpdate(locale: Locale.init(identifier: "th")) { (streetName) in
-            self.view?.displayLocationView(location: streetName)
-        }
     }
     
     func notifyDisplayGPSSpeed(speed: Double) {
@@ -86,5 +95,11 @@ extension MainPresenter: MainPresenterProtocol {
     
     func notifyInsertHistoryActivity(activity: ActivityForm) {
         self.interactor?.insertHistoryActivity(activity: activity)
+    }
+    
+    func notifyPostTrackedLocation() {
+        if let location = LocationHelper.shared.location {
+            LocationUpdater.shared.postTrackedLocation(location)
+        }
     }
 }

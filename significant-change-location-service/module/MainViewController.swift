@@ -39,7 +39,6 @@ class MainViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.presenter?.notifyLocationFetched()
     }
     
     func initUI() {
@@ -52,32 +51,12 @@ class MainViewController: UIViewController {
     func setupNavigationBar() {
         self.navigationItem.title = "Significant Change Location"
     }
-    
-    //MARK: ย้ายไปอัพเดตตอนเช็คเวลากิจกรรม
-    func prepareInsertHistoryActivity() {
-        if let activity = self.activityData,
-           let date = self.dateData,
-           let latLng =  self.latLngData,
-           let speed = self.speedData,
-           let location = self.locationData {
-                let activityForm = ActivityForm(date: date,
-                                                activity: activity,
-                                                speed: speed,
-                                                latLng: latLng,
-                                                location: location)
-
-                self.presenter?.notifyInsertHistoryActivity(activity: activityForm)
-            }
-        self.presenter?.selfFetchActivity()
-        self.collectionView.reloadData()
-    }
 }
 
 extension MainViewController:  MainViewProtocol {
     
     //MARK: location not show and save
     func displayLocationView(location: String) {
-        print("isShowLocationData")
         self.locationLabel.text = "ตำเเหน่งปัจจุบัน\n" + location
         self.locationData = location
     }
@@ -85,6 +64,7 @@ extension MainViewController:  MainViewProtocol {
     func displayGpsSpeed(speed: Double) {
         self.gpsSpeedLabel.text = String(format: "ความเร็ว = %.1f", speed) + " Km/h"
         self.speedData = speed
+        UserDefaults.standard.set(String(format: "%.1f", speed), forKey: "stored_speed")
     }
     
     func displayLatLng(latLng: String) {
@@ -93,16 +73,6 @@ extension MainViewController:  MainViewProtocol {
     }
     
     func displayMotionData(date: String, activity: String) {
-        //MARK: การเช็คเปลี่ยนกิจกรรมยังไม่เสรียถ เเละยังเก็บเบื้องหลังไม่ได้
-        //MARK: ย้ายไปอัพเดตตอนเช็คเวลากิจกรรม
-        if activity != activityData {
-            self.collectionView.reloadData()
-            self.prepareInsertHistoryActivity()
-        } else {
-            self.collectionView.reloadData()
-            print("activity not change = not insert to database")
-        }
-        
         self.dateLabel.text = "วันที่เริ่ม = \(date)"
         self.activityNameLabel.text = activity
         
@@ -119,6 +89,10 @@ extension MainViewController:  MainViewProtocol {
     
     func displayActivityFetch(activity: [ActivityForm]) {
         self.activityFecthData = activity
+    }
+    
+    func reloadLocationNameService() {
+        self.collectionView.reloadData()
     }
 }
 

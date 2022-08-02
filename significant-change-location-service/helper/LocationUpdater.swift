@@ -10,6 +10,10 @@ import UIKit
 import MapKit
 import XCGLogger
 
+extension NSNotification.Name {
+    static let LocationHelperReloadView =  NSNotification.Name("location.source.reload.view")
+}
+
 class LocationUpdater: NSObject {
     
     public static var shared: LocationUpdater = {
@@ -114,9 +118,58 @@ class LocationUpdater: NSObject {
                 self.loggingNotification(message: "\(postMessage) due to no location")
             }
         }else{
+            //MARK: test insert TrackedLocation to database non login
+            #if DEBUG
+            var postMessage = "posted location failed,"
+            if let lastLocation = lastLocation {
+                let wrappedLocation: WrappedCLLocation = self.manipulateWrappedLocation(location: lastLocation)
+                self.locationsInLatestArea.append(wrappedLocation)
+                self.syncBufferedLocations()
+                
+                postMessage = String.init(format: "%@ posts %f, %f, horizontalAcc=%.0f, inArea=%d, refID=%d, distance=%.0fm, duration=%ds", 0, wrappedLocation.coordinate.latitude, wrappedLocation.coordinate.longitude, wrappedLocation.horizontalAccuracy, wrappedLocation.isInArea, wrappedLocation.referenceDetentionNumber, wrappedLocation.distance, wrappedLocation.durationInArea)
+                self.loggingNotification(message: postMessage)
+                
+                if Reachability.isConnectedToNetwork() {
+                    Logger.shared.debug("Reachability : isConnectedToNetwork")
+                }else{
+                    Logger.shared.debug("Reachability : not isConnectedToNetwork")
+                    UserSession.shared.addTimelineLocation(location: wrappedLocation)
+                }
+                
+                LocationHelper.shared.geoUpdate { (name) in
+                    let now = Date()
+                    let geo = Geocoder()
+                    geo.name = name
+                    geo.at = now.timeIntervalSince1970
+                    geo.coordinate = wrappedLocation.coordinate
+                    UserSession.shared.addTimeline(geo: geo, dateKey: now.dateKeyString())
+                }
+                
+                // store in local storage
+                if let motionActivity = UserDefaults.standard.string(forKey: "stored_motion"),
+                   let speedMotion = UserDefaults.standard.string(forKey: "stored_speed"),
+                   let location = UserDefaults.standard.string(forKey: "stored_location") {
+                    let activityForm = ActivityForm(date: "\(Date())",
+                                                    activity: "\(motionActivity)",
+                                                    speed: Double(speedMotion) ?? 0.0,
+                                                    latLng: "\(wrappedLocation.coordinate.latitude), \(wrappedLocation.coordinate.longitude)",
+                                                    location: "\(location)")
+                        self.insertHistoryActivity(activity: activityForm)
+                }
+            } else {
+                self.loggingNotification(message: "\(postMessage) due to no location")
+            }
+            #else
             loggingNotification(message: "location helper stopped tracking due to no actived user, or non-tracking user")
+            #endif
             LocationHelper.shared.stopUpdateLocation()
         }
+    }
+    
+    //MARK: test insert TrackedLocation to database non login
+    func insertHistoryActivity(activity: ActivityForm) {
+        DBActivityHelper.insertActivity(historyActivity: activity)
+        NotificationCenter.default.post(name: .LocationHelperReloadView, object: nil)
     }
     
     func loggingNotification(message: String){

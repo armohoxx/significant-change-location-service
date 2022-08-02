@@ -15,7 +15,7 @@ protocol LocationHelperDelegate {
 }
 
 extension NSNotification.Name {
-    //static let LocationHelperDidUpdatedSelectedLocation =  NSNotification.Name("location.source.selected")
+    static let LocationHelperDidUpdatedSelectedLocation =  NSNotification.Name("location.source.selected")
     static let LocationSpeedHelperDidUpdatedSelectedLocation =  NSNotification.Name("location.source.selected.speed")
     static let LocationHelperDidUpdatedGPSLocation =  NSNotification.Name("th.or.nstda.aat.vwatch.location.updated")
     static let LocationHelperDidError =  NSNotification.Name("th.or.nstda.aat.vwatch.location.updated.updated.error")
@@ -72,7 +72,7 @@ class LocationHelper : NSObject{
         //MARK: SignificantLocationChanges
         self.startMySignificantLocationChanges()
         //MARK: StandardLocationChanges
-        //self.locm?.startUpdatingLocation()
+        self.locm?.startUpdatingLocation()
     }
     
     public func update(completion: ((CLLocation?) -> Void)?) {
@@ -81,6 +81,9 @@ class LocationHelper : NSObject{
     }
 
     func stopUpdateLocation() {
+        //MARK: SignificantLocationChanges
+        self.locm?.stopMonitoringSignificantLocationChanges()
+        //MARK: StandardLocationChanges
         self.locm?.stopUpdatingLocation()
     }
     
@@ -104,6 +107,8 @@ class LocationHelper : NSObject{
         let defaultStreetName = "unnamed_street"
         guard let location = self.location else {
             if let block = completionHandler {
+                UserDefaults.standard.set("\(defaultStreetName)", forKey: "stored_location")
+                NotificationCenter.default.post(name: .LocationHelperDidUpdatedSelectedLocation, object: defaultStreetName)
                 block(defaultStreetName)
             }
             return;
@@ -138,6 +143,8 @@ class LocationHelper : NSObject{
                 }
                 
                 if named == "" {
+                    UserDefaults.standard.set("\(defaultStreetName)", forKey: "stored_location")
+                    NotificationCenter.default.post(name: .LocationHelperDidUpdatedSelectedLocation, object: defaultStreetName)
                     named = defaultStreetName
                 }
                 
@@ -147,9 +154,11 @@ class LocationHelper : NSObject{
 //                    delegate.onLocationUpdated(location: loc)
 //                }
 //
-//                NotificationCenter.default.post(name: .LocationHelperDidUpdatedSelectedLocation, object: loc)
+                
                 
                 if let block = completionHandler {
+                    UserDefaults.standard.set("\(named)", forKey: "stored_location")
+                    NotificationCenter.default.post(name: .LocationHelperDidUpdatedSelectedLocation, object: named)
                     block(named)
                 }
             }
@@ -168,6 +177,8 @@ extension LocationHelper : CLLocationManagerDelegate {
             let location = locations.last! as CLLocation
             let speed: Double = 3.6 * location.speed
             
+            self.location = loc
+            
             NotificationCenter.default.post(name: .LocationHelperDidUpdatedGPSLocation, object: loc)
             
             if let completion = self.updateCompletion {
@@ -179,14 +190,18 @@ extension LocationHelper : CLLocationManagerDelegate {
             } else {
                 NotificationCenter.default.post(name: .LocationSpeedHelperDidUpdatedSelectedLocation, object: speed)
             }
-            self.location = loc
+            
+            print("location = ", location.coordinate.latitude)
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let delegate = self.delegate {
             delegate.onLocationUpdateFailed(error: error)
+            //MARK: SignificantLocationChanges
             manager.stopMonitoringSignificantLocationChanges()
+            //MARK: StandardLocationChanges
+            self.locm?.stopUpdatingLocation()
         }
     }
     
@@ -196,7 +211,10 @@ extension LocationHelper : CLLocationManagerDelegate {
             let err = NSError(domain: "To turn on Location Services for apps. Go to Settings > Privacy > Location Services.", code: 500, userInfo:nil)
             if let delegate = self.delegate {
                 delegate.onLocationUpdateFailed(error: err)
+                //MARK: SignificantLocationChanges
                 manager.stopMonitoringSignificantLocationChanges()
+                //MARK: StandardLocationChanges
+                self.locm?.stopUpdatingLocation()
             }
             debugPrint(err.localizedDescription)
         default:

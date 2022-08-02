@@ -35,18 +35,28 @@ class ActivityMotion : NSObject {
                             if activity.automotive == true {
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinVehicleInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Automative || Min : \(RemoteConfigHelper.shared.defaultTrackingMinVehicleInterval)")
+                                
+                                UserDefaults.standard.set("อยู่บนรถ", forKey: "stored_motion")
                             } else if activity.cycling == true {
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinCyclingInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Cycling || Min : \(RemoteConfigHelper.shared.defaultTrackingMinCyclingInterval)")
+                                
+                                UserDefaults.standard.set("ปั่นจักรยาน", forKey: "stored_motion")
                             } else if activity.running == true {
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinRunningInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Running || Min : \(RemoteConfigHelper.shared.defaultTrackingMinRunningInterval)")
+                                
+                                UserDefaults.standard.set("วิ่ง", forKey: "stored_motion")
                             } else if activity.walking == true {
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinWalkingInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Walking || Min : \(RemoteConfigHelper.shared.defaultTrackingMinWalkingInterval)")
+                                
+                                UserDefaults.standard.set("เดิน", forKey: "stored_motion")
                             } else if activity.stationary == true {
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Stationary || Min : \(RemoteConfigHelper.shared.defaultTrackingMinInterval)")
+                                
+                                UserDefaults.standard.set("ไม่มีการเคลื่อนไหว", forKey: "stored_motion")
                             }
                         } else {
                             UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinInterval)
