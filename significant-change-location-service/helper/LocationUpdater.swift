@@ -149,12 +149,18 @@ class LocationUpdater: NSObject {
                 if let motionActivity = UserDefaults.standard.string(forKey: "stored_motion"),
                    let speedMotion = UserDefaults.standard.string(forKey: "stored_speed"),
                    let location = UserDefaults.standard.string(forKey: "stored_location") {
-                    let activityForm = ActivityForm(date: "\(Date())",
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                    let date = dateFormatter.string(from: Date())
+                    
+                    let activityForm = ActivityForm(date: "\(date)",
                                                     activity: "\(motionActivity)",
                                                     speed: Double(speedMotion) ?? 0.0,
                                                     latLng: "\(wrappedLocation.coordinate.latitude), \(wrappedLocation.coordinate.longitude)",
                                                     location: "\(location)")
                         self.insertHistoryActivity(activity: activityForm)
+                } else {
+                    print("Someting wrong to push data")
                 }
             } else {
                 self.loggingNotification(message: "\(postMessage) due to no location")
