@@ -29,7 +29,10 @@ class ActivityMotion : NSObject {
                     if let activity = data {
                         NotificationCenter.default.post(name: .ActivityMotionHelper, object: activity)
                         let formatingDate = activity.startDate.HHmm()
-                       
+                        
+                        //MARK: Start Location
+                        LocationHelper.shared.update()
+                        
                         if CMMotionActivityConfidence(rawValue: activity.confidence.rawValue) == CMMotionActivityConfidence.high {
                         
                             if activity.automotive == true {

@@ -65,6 +65,8 @@ class LocationUpdater: NSObject {
                     self.lastUpdated = Date()
                 }
             }
+            
+            self.loggingNotification(message: "location update => \(lastLocation?.coordinate.latitude), \(lastLocation?.coordinate.longitude)")
         }
     }
     
@@ -168,7 +170,8 @@ class LocationUpdater: NSObject {
             #else
             loggingNotification(message: "location helper stopped tracking due to no actived user, or non-tracking user")
             #endif
-            LocationHelper.shared.stopUpdateLocation()
+            //MARK: run location non stop
+            //LocationHelper.shared.stopUpdateLocation()
         }
     }
     

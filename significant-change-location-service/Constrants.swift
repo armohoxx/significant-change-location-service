@@ -46,11 +46,11 @@ struct Constants {
         "en": "https://www.ddc-care.com"
     ]
     static var DefaultRadiusAreaPlace: [Double] = [50,500]
-    static var DefaultTrackingMinVehicleInterval:Int = 4
-    static var DefaultTrackingMinCyclingInterval:Int = 6
-    static var DefaultTrackingMinRunningInterval:Int = 1 //6
-    static var DefaultTrackingMinWalkingInterval:Int = 1 //8
-    static var DefaultTrackingMinInterval:Int = 1 //10
+    static var DefaultTrackingMinVehicleInterval:Int = 4 //4
+    static var DefaultTrackingMinCyclingInterval:Int = 6 //6
+    static var DefaultTrackingMinRunningInterval:Int = 6 //6
+    static var DefaultTrackingMinWalkingInterval:Int = 8 //8
+    static var DefaultTrackingMinInterval:Int = 10 //10
     static var DefaultWristbandAPIURL: String = "https://wristband.ddc-care.com/"
     static var DefaultTime:Int = 5
     static var localizedCountry: [String: String] = [
