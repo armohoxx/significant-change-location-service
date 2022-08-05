@@ -58,6 +58,11 @@ class RemoteConfigHelper: NSObject {
     var defaultTrackingMinRunningInterval = Constants.DefaultTrackingMinRunningInterval
     var defaultTrackingMinWalkingInterval = Constants.DefaultTrackingMinWalkingInterval
     var defaultTrackingMinInterval = Constants.DefaultTrackingMinInterval
+    var priorityTrackingMinVehicleInterval = Constants.PriorityMinVehicleInterval
+    var priorityTrackingMinCyclingInterval = Constants.PriorityMinCyclingInterval
+    var priorityTrackingMinRunningInterval = Constants.PriorityMinRunningInterval
+    var priorityTrackingMinWalkingInterval = Constants.PriorityMinWalkingInterval
+    var priorityTrackingMinInterval = Constants.PriorityMinInterval
     var isRegistrationEnabled = false
     var isLatestVersionOnly = false
     var minimumRequirementEnabled = false

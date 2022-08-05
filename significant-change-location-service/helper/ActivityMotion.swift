@@ -16,6 +16,8 @@ class ActivityMotion : NSObject {
     
     static let shared = ActivityMotion()
     let activityManager = CMMotionActivityManager()
+    var currentPriorityMotion: Int = 3
+    var previousPriorityMotion: Int = 3
     
     func stopActivityUpdates() {
         self.activityManager.stopActivityUpdates()
@@ -33,34 +35,44 @@ class ActivityMotion : NSObject {
                         //MARK: Start Location
                         LocationHelper.shared.update()
                         
+                        //MARK: หาทางกำหนด priority ของเเต่ละกิจกรรม
                         if CMMotionActivityConfidence(rawValue: activity.confidence.rawValue) == CMMotionActivityConfidence.high {
                         
                             if activity.automotive == true {
+                                UserSession.shared.setCurrentPriorityMinInterval(interval: RemoteConfigHelper.shared.priorityTrackingMinVehicleInterval)
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinVehicleInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Automative || Min : \(RemoteConfigHelper.shared.defaultTrackingMinVehicleInterval)")
                                 
-                                UserDefaults.standard.set("อยู่บนรถ", forKey: "stored_motion")
+                                UserSession.shared.setMotionName(motion: MotionName.Vehicle.rawValue)
                             } else if activity.cycling == true {
+                                UserSession.shared.setCurrentPriorityMinInterval(interval: RemoteConfigHelper.shared.priorityTrackingMinCyclingInterval)
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinCyclingInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Cycling || Min : \(RemoteConfigHelper.shared.defaultTrackingMinCyclingInterval)")
                                 
-                                UserDefaults.standard.set("ปั่นจักรยาน", forKey: "stored_motion")
+                                UserSession.shared.setMotionName(motion: MotionName.Cycling.rawValue)
                             } else if activity.running == true {
+                                UserSession.shared.setCurrentPriorityMinInterval(interval: RemoteConfigHelper.shared.priorityTrackingMinRunningInterval)
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinRunningInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Running || Min : \(RemoteConfigHelper.shared.defaultTrackingMinRunningInterval)")
                                 
-                                UserDefaults.standard.set("วิ่ง", forKey: "stored_motion")
+                                UserSession.shared.setMotionName(motion: MotionName.Running.rawValue)
                             } else if activity.walking == true {
+                                UserSession.shared.setCurrentPriorityMinInterval(interval: RemoteConfigHelper.shared.priorityTrackingMinWalkingInterval)
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinWalkingInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Walking || Min : \(RemoteConfigHelper.shared.defaultTrackingMinWalkingInterval)")
                                 
-                                UserDefaults.standard.set("เดิน", forKey: "stored_motion")
+                                UserSession.shared.setMotionName(motion: MotionName.Walking.rawValue)
                             } else if activity.stationary == true {
+                                UserSession.shared.setCurrentPriorityMinInterval(interval: RemoteConfigHelper.shared.priorityTrackingMinInterval)
                                 UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinInterval)
                                 self.loggingNotification(message: "Activity Motion : \(formatingDate) | Stationary || Min : \(RemoteConfigHelper.shared.defaultTrackingMinInterval)")
                                 
-                                UserDefaults.standard.set("ไม่มีการเคลื่อนไหว", forKey: "stored_motion")
+                                UserSession.shared.setMotionName(motion: MotionName.Stationary.rawValue)
                             }
+                            
+                            self.previousPriorityMotion = UserSession.shared.getPreviousPriorityMinInterval()
+                            self.currentPriorityMotion = UserSession.shared.getCurrentPriorityMinInterval()
+                            print("self.currentPriorityMotion = \(self.currentPriorityMotion), self.previousPriorityMotion = \(self.previousPriorityMotion)")
                         } else {
                             UserSession.shared.setTrackingMinInterval(interval: RemoteConfigHelper.shared.defaultTrackingMinInterval)
                         }

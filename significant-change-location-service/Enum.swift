@@ -13,3 +13,11 @@ enum DebugMode: String {
     case DebuggingNotificationEnabled = "notification"
     case CopyFCMToken = "fcmtoken"
 }
+
+enum MotionName: String {
+    case Vehicle = "Automative"
+    case Cycling = "Cycling"
+    case Running = "Running"
+    case Walking = "Walking"
+    case Stationary = "Stationary"
+}

@@ -51,6 +51,11 @@ struct Constants {
     static var DefaultTrackingMinRunningInterval:Int = 6 //6
     static var DefaultTrackingMinWalkingInterval:Int = 8 //8
     static var DefaultTrackingMinInterval:Int = 10 //10
+    static var PriorityMinVehicleInterval:Int = 1 //4
+    static var PriorityMinCyclingInterval:Int = 1 //6
+    static var PriorityMinRunningInterval:Int = 2 //6
+    static var PriorityMinWalkingInterval:Int = 2 //8
+    static var PriorityMinInterval:Int = 3 //10
     static var DefaultWristbandAPIURL: String = "https://wristband.ddc-care.com/"
     static var DefaultTime:Int = 5
     static var localizedCountry: [String: String] = [

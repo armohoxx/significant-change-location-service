@@ -28,6 +28,9 @@ class UserSession {
     static let receivedVerificationSignalAt = "receivedVerificationSignalAt"
     static let isDetentionPlaceAdded = "isDetentionPlaceAdded"
     static let trackingMinInterval = "trackingMinInterval"
+    static let previousPriorityMinInterval = "previousPriorityMinInterval"
+    static let currentPriorityMinInterval = "currentPriorityMinInterval"
+    static let motionName = "motionName"
     static let timelineWrappedCLLocationKey = "timelineWrappedCLLocationKey"
     static let indexLocationKey = "indexLocation"
     static let roomVideoCallHistoryKey = "roomVideoCallHistory"
@@ -76,6 +79,53 @@ class UserSession {
             interval = 10
         }
         return interval
+    }
+    
+    // MARK: Previous Priority Min Interval
+    func setPreviousPriorityMinInterval(interval: Int) {
+        UserDefaults.standard.set(interval, forKey: UserSession.previousPriorityMinInterval)
+        UserDefaults.standard.synchronize()
+    }
+    
+    func getPreviousPriorityMinInterval() -> Int {
+        var interval = UserDefaults.standard.integer(forKey: UserSession.previousPriorityMinInterval)
+        if interval <= 0 {
+            interval = 3
+        }
+        return interval
+    }
+    
+    func removePreviousPriorityMinInterval() {
+        UserDefaults.standard.removeObject(forKey: UserSession.previousPriorityMinInterval)
+    }
+    
+    // MARK: Current Priority Min Interval
+    func setCurrentPriorityMinInterval(interval: Int) {
+        UserDefaults.standard.set(interval, forKey: UserSession.currentPriorityMinInterval)
+        UserDefaults.standard.synchronize()
+    }
+    
+    func getCurrentPriorityMinInterval() -> Int {
+        var interval = UserDefaults.standard.integer(forKey: UserSession.currentPriorityMinInterval)
+        if interval <= 0 {
+            interval = 3
+        }
+        return interval
+    }
+    
+    // MARK: Motion Name
+    func setMotionName(motion: String) {
+        UserDefaults.standard.set(motion, forKey: UserSession.motionName)
+        UserDefaults.standard.synchronize()
+    }
+    
+    func getMotionName() -> String? {
+        var motion = UserDefaults.standard.string(forKey: UserSession.motionName)
+        
+        if motion == "" {
+            motion = MotionName.Stationary.rawValue
+        }
+        return motion ?? MotionName.Stationary.rawValue
     }
     
     // MARK: Timeline

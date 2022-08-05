@@ -70,7 +70,7 @@ class LocationHelper : NSObject{
             break
         }
         //MARK: SignificantLocationChanges
-        self.startMySignificantLocationChanges()
+        //self.startMySignificantLocationChanges()
         //MARK: StandardLocationChanges
         self.locm?.startUpdatingLocation()
     }
@@ -82,7 +82,7 @@ class LocationHelper : NSObject{
 
     func stopUpdateLocation() {
         //MARK: SignificantLocationChanges
-        self.locm?.stopMonitoringSignificantLocationChanges()
+        //self.locm?.stopMonitoringSignificantLocationChanges()
         //MARK: StandardLocationChanges
         self.locm?.stopUpdatingLocation()
     }
@@ -174,6 +174,7 @@ extension LocationHelper : CLLocationManagerDelegate {
         
         if locations.count > 0 {
             let loc = locations.first
+            //MARK: SignificantLocationChanges most recent location is always the last item in the array
             let location = locations.last! as CLLocation
             let speed: Double = 3.6 * location.speed
             
@@ -199,7 +200,7 @@ extension LocationHelper : CLLocationManagerDelegate {
         if let delegate = self.delegate {
             delegate.onLocationUpdateFailed(error: error)
             //MARK: SignificantLocationChanges
-            manager.stopMonitoringSignificantLocationChanges()
+            //manager.stopMonitoringSignificantLocationChanges()
             //MARK: StandardLocationChanges
             self.locm?.stopUpdatingLocation()
         }
@@ -212,7 +213,7 @@ extension LocationHelper : CLLocationManagerDelegate {
             if let delegate = self.delegate {
                 delegate.onLocationUpdateFailed(error: err)
                 //MARK: SignificantLocationChanges
-                manager.stopMonitoringSignificantLocationChanges()
+                //manager.stopMonitoringSignificantLocationChanges()
                 //MARK: StandardLocationChanges
                 self.locm?.stopUpdatingLocation()
             }

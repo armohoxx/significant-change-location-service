@@ -25,6 +25,9 @@ class LocationUpdater: NSObject {
     var bgIdentifier: UIBackgroundTaskIdentifier = .invalid
     var isUpdating: Bool = false
     var updateMinuteThreshold: Int = 10
+    var currentPriorityMotion: Int = 3
+    var previousPriorityMotion: Int = 3
+    var isSent: Bool = false
     
     /*
      * locationsInLatestArea
@@ -57,16 +60,43 @@ class LocationUpdater: NSObject {
             let calender:Calendar = Calendar.current
             let diff = calender.dateComponents([.hour, .minute, .second], from: self.lastUpdated, to: Date())
             if let min = diff.minute {
-                self.updateMinuteThreshold = UserSession.shared.getTrackingMinInterval()
-                //MARK: push activity (กิจกรรมดำเนินอยู่เเล้วหยุดนิ่งจะทำไงดี?)
-                if (min >= self.updateMinuteThreshold) {
-                    Logger.shared.debug("postTrackedLocation min : \(self.updateMinuteThreshold)")
-                    self.postTrackedLocation(lastLocation)
-                    self.lastUpdated = Date()
+                
+                self.previousPriorityMotion = UserSession.shared.getPreviousPriorityMinInterval()
+                self.currentPriorityMotion = UserSession.shared.getCurrentPriorityMinInterval()
+                
+                //MARK: check prority here
+                if self.currentPriorityMotion < self.previousPriorityMotion {
+                    if self.isSent == false {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            Logger.shared.debug("postTrackedLocation min : \(self.updateMinuteThreshold)")
+                            self.postTrackedLocation(lastLocation)
+                            self.lastUpdated = Date()
+                            
+                            self.isSent = true
+                        }
+                    } else {
+                        self.updateMinuteThreshold = 1
+                        if (min >= self.updateMinuteThreshold) {
+                            Logger.shared.debug("postTrackedLocation min : \(self.updateMinuteThreshold)")
+                            self.postTrackedLocation(lastLocation)
+                            self.lastUpdated = Date()
+                            UserSession.shared.setPreviousPriorityMinInterval(interval: self.currentPriorityMotion)
+                        }
+                    }
+                } else if self.currentPriorityMotion > self.previousPriorityMotion {
+                    UserSession.shared.setPreviousPriorityMinInterval(interval: self.currentPriorityMotion)
+                } else {
+                    self.updateMinuteThreshold = UserSession.shared.getTrackingMinInterval()
+                    if (min >= self.updateMinuteThreshold) {
+                        Logger.shared.debug("postTrackedLocation min : \(self.updateMinuteThreshold)")
+                        self.postTrackedLocation(lastLocation)
+                        self.lastUpdated = Date()
+                        UserSession.shared.setPreviousPriorityMinInterval(interval: self.currentPriorityMotion)
+                    }
                 }
             }
             
-            self.loggingNotification(message: "location update => \(lastLocation?.coordinate.latitude), \(lastLocation?.coordinate.longitude)")
+            self.loggingNotification(message: "location update => \(lastLocation?.coordinate.latitude ?? 0), \(lastLocation?.coordinate.longitude ?? 0)")
         }
     }
     
@@ -148,7 +178,7 @@ class LocationUpdater: NSObject {
                 }
                 
                 // store in local storage
-                if let motionActivity = UserDefaults.standard.string(forKey: "stored_motion"),
+                if let motionActivity = UserSession.shared.getMotionName(),
                    let speedMotion = UserDefaults.standard.string(forKey: "stored_speed"),
                    let location = UserDefaults.standard.string(forKey: "stored_location") {
                     let dateFormatter = DateFormatter()
